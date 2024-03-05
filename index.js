@@ -1,14 +1,14 @@
-import axios from "axios";
-import cron from 'node-cron'
-import { dbConnection } from "./database/conection.js";
+
 import express from 'express'
-import { eventRouter } from "./routes/event.js";
 import dotenv from 'dotenv'
-import { getTomorrowEventsBeforeHour } from "./helpers/getTomorrowEvents.js";
-import { getTodayEventsAfterHour } from "./helpers/getTodayEvents.js";
 import cookieParser from 'cookie-parser'
+
+import { dbConnection } from "./database/conection.js";
+import { eventRouter } from "./routes/event.js";
 import { errorHandlerMiddleware } from "./middlewares/error.js";
 import { patientRouter } from "./routes/patient.js";
+import { runScheduledTask } from "./bot/runCronTaks.js";
+import { authRouter } from './routes/auth.js';
 
 
 dotenv.config()
@@ -24,7 +24,7 @@ app.use(cookieParser())
 app.use(express.static('public'))
 
 // rutas
-// app.use('/api/auth',)
+app.use('/api/auth', authRouter)
 app.use('/api/patient' , patientRouter)
 app.use('/api/event',eventRouter)
 app.use(errorHandlerMiddleware)
@@ -36,63 +36,63 @@ app.listen(process.env.PORT, () => {
 
 
 
+// runScheduledTask()
+
+// // Función para obtener los eventos y ejecutar la lógica periódicamente
+// const runScheduledTask = async () => {
+//   try {
+//     const events = [];
+//     const { data } = await axios.get('http://localhost:4000/api/event/');
+//     events.push(...data.events);
+
+//     const tomorrowEvents = getTomorrowEventsBeforeHour(events, 13);
+//     const todayEvents = getTodayEventsAfterHour(events, 13);
 
 
-// Función para obtener los eventos y ejecutar la lógica periódicamente
-const runScheduledTask = async () => {
-  try {
-    const events = [];
-    const { data } = await axios.get('http://localhost:4000/api/event/');
-    events.push(...data.events);
+//     cron.schedule('55 17 * * *', () => {
+//       console.log("Ejecutando");
+//       tomorrowEvents.forEach((event) => {
+//         console.log(event);
+//         const startDateTime = new Date(event.start);
+//         const message = `*Recordatorio* mañana a las ${startDateTime.getUTCHours()}:00 horas. 🕒☺️`;
+//         const data = {
+//           message,
+//           number: event.title
+//         };
+//         axios.post('http://localhost:3002/send-message', data)
+//           .then(response => {
+//             console.log('Mensaje enviado correctamente');
+//           })
+//           .catch(error => {
+//             console.error('Error al enviar el mensaje:', error);
+//           });
+//       });
+//     });
 
-    const tomorrowEvents = getTomorrowEventsBeforeHour(events, 13);
-    const todayEvents = getTodayEventsAfterHour(events, 13);
+//     cron.schedule('00 18 * * *', () => {
+//       console.log("Ejecutando");
+//       todayEvents.forEach((event) => {
+//         console.log(event);
+//         const startDateTime = new Date(event.start);
+//         const message = `*Recordatorio* hoy a las ${startDateTime.getUTCHours()}:00 horas. 🕒☺️`;
+//         const data = {
+//           message,
+//           number: event.title
+//         };
+//         axios.post('http://localhost:3002/send-message', data)
+//           .then(response => {
+//             console.log('Mensaje enviado correctamente');
+//           })
+//           .catch(error => {
+//             console.error('Error al enviar el mensaje:', error);
+//           });
+//       });
+//     });
 
-
-    cron.schedule('55 17 * * *', () => {
-      console.log("Ejecutando");
-      tomorrowEvents.forEach((event) => {
-        console.log(event);
-        const startDateTime = new Date(event.start);
-        const message = `*Recordatorio* mañana a las ${startDateTime.getUTCHours()}:00 horas. 🕒☺️`;
-        const data = {
-          message,
-          number: event.title
-        };
-        axios.post('http://localhost:3002/send-message', data)
-          .then(response => {
-            console.log('Mensaje enviado correctamente');
-          })
-          .catch(error => {
-            console.error('Error al enviar el mensaje:', error);
-          });
-      });
-    });
-
-    cron.schedule('00 18 * * *', () => {
-      console.log("Ejecutando");
-      todayEvents.forEach((event) => {
-        console.log(event);
-        const startDateTime = new Date(event.start);
-        const message = `*Recordatorio* hoy a las ${startDateTime.getUTCHours()}:00 horas. 🕒☺️`;
-        const data = {
-          message,
-          number: event.title
-        };
-        axios.post('http://localhost:3002/send-message', data)
-          .then(response => {
-            console.log('Mensaje enviado correctamente');
-          })
-          .catch(error => {
-            console.error('Error al enviar el mensaje:', error);
-          });
-      });
-    });
-
-  } catch (error) {
-    console.log(error);
-  }
-};
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 
 // Ejecutar la función periódicamente

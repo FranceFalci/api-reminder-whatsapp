@@ -1,9 +1,7 @@
 import { response } from 'express';
-import Event from '../models/Event.js';
 import Patient from '../models/Patient.js';
-import User from '../models/User.js';
-import { validateEvent } from '../schemas-zod/EventSchema.js';
 import { errorHandler } from '../helpers/errorHandler.js';
+import { validatePatient } from '../schemas-zod/patientSchema.js';
 
 export const getPatiens = async (req, res = response, next) => {
 
@@ -11,7 +9,7 @@ export const getPatiens = async (req, res = response, next) => {
   try {
 
     const patients = await Patient.find()
-    res.json({ success: true, patients });
+    res.json({ success: true, patients })
 
   } catch (error) {
 
@@ -20,21 +18,22 @@ export const getPatiens = async (req, res = response, next) => {
   }
 }
 
-export const createEvent = async (req, res = response, next) => {
-  const result = validateEvent(req.body)
+export const createPatient = async (req, res = response, next) => {
+  const result = validatePatient(req.body)
 
   if (result.error) return next(errorHandler('400', JSON.parse(result.error.message)))
-  const event = new Event(result.data)
+
+  const patient = new Patient(result.data)
 
   try {
 
-    event.user = req.uid;
+    // patient.user = req.uid;
 
-    const newEvent = await event.save();
+    const newPatient = await patient.save();
 
     res.json({
       ok: true,
-      event: newEvent
+      event: newPatient
     })
 
 
@@ -44,32 +43,30 @@ export const createEvent = async (req, res = response, next) => {
   }
 }
 
-export const updateEvent = async (req, res = response, next) => {
-  const result = validateEvent(req.body)
+export const updatePatient = async (req, res = response, next) => {
+  const result = validatePatient(req.body)
 
   if (result.error) return next(errorHandler('400', JSON.parse(result.error.message)))
 
-  const eventId = req.params.id;
-  const uid = req.uid;
+  const patientId = req.params.patientId
 
   try {
 
-    const event = await findById(eventId);
+    const patient = await Patient.findById(patientId);
 
-    if (!event) return next(errorHandler('404', 'El evento no existe'))
+    if (!patient) return next(errorHandler('404', 'El paciente no existe'))
 
-    if (event.user.toString() !== uid) return next(errorHandler('401', 'No tienes permiso necesario'))
+    // if (patient.user.toString() !== uid) return next(errorHandler('401', 'No tienes permiso necesario'))
 
-    const newEvent = {
-      ...result.data,
-      user: uid
+    const newPatient = {
+      ...result.data
     }
 
-    const updatedEvent = await findByIdAndUpdate(eventId, newEvent, { new: true });
+    const updatedPatient = await Patient.findByIdAndUpdate(patientId, newPatient, { new: true });
 
     res.json({
       ok: true,
-      event: updatedEvent
+      event: updatedPatient
     });
 
 
@@ -80,26 +77,26 @@ export const updateEvent = async (req, res = response, next) => {
 
 }
 
-export const deleteEvent = async (req, res = response, next) => {
+export const deletePatient = async (req, res = response, next) => {
 
-  const eventId = req.params.id;
-  const uid = req.uid;
+  const patientId = req.params.id;
+  // const uid = req.uid;
 
   try {
 
-    const event = await findById(eventId);
+    const patient = await Patient.findById(patientId);
 
-    if (!event) {
+    if (!patient) {
       return res.status(404).json({
         ok: false,
-        msg: 'Evento no existe por ese id'
+        msg: 'El paciente no existe'
       });
     }
 
-    if (event.user.toString() !== uid) return next(errorHandler('401', 'No tienes permiso para eliminar este evento'))
+    // if (patient.user.toString() !== uid) return next(errorHandler('401', 'No tienes permiso para eliminar este evento'))
 
 
-    await findByIdAndDelete(eventId);
+    await findByIdAndDelete(patientId);
 
     res.json({ ok: true });
 

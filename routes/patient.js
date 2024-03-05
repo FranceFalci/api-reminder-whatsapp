@@ -1,16 +1,17 @@
 
 import { Router } from 'express';
-import { getPatiens } from '../controllers/patient.js';
+import { createPatient, deletePatient, getPatiens, updatePatient } from '../controllers/patient.js';
+import { verifyToken } from '../middlewares/verifyToken.js';
 
 export const patientRouter = Router()
 
+patientRouter.use(verifyToken)
 
-patientRouter.get('/:idUser', getPatiens)
+patientRouter.get('/', getPatiens)
 
-// patientRouter.post('/', createEvent)
+patientRouter.post('/', createPatient)
 
-// 
-// patientRouter.put('/:id', updateEvent)
+patientRouter.put('/:id', updatePatient)
 
-// patientRouter.delete('/:id', deleteEvent)
+patientRouter.delete('/:id', deletePatient)
 

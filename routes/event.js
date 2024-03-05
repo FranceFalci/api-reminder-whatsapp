@@ -1,14 +1,11 @@
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../controllers/event.js';
 
 import { Router } from 'express';
-// import { validarJWT                            } from '../middlewares/validarJWT';
-// import { check } from 'express-validator';
-// import { validarCampos } from '../middlewares/validarCampos';
-// import { isDate } from '../helpers/isDate';
+import { verifyToken } from '../middlewares/verifyToken.js';
 
 export const eventRouter = Router()
 
-// router.use(validarJWT)
+eventRouter.use(verifyToken)
 
 eventRouter.get('/:idUser' , getEvents) 
 

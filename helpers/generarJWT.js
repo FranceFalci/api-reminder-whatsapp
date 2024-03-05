@@ -1,4 +1,4 @@
-import { sign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 export const generarJWT = (uid, name) => {
 
@@ -6,7 +6,7 @@ export const generarJWT = (uid, name) => {
 
     const payload = { uid, name };
 
-    sign(payload, process.env.SECRET_JWT_SEED, {
+    jwt.sign(payload, process.env.SECRET_JWT_SEED, {
       
     }, (err, token) => {
 

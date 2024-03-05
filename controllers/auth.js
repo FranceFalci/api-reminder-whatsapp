@@ -1,41 +1,43 @@
-import { response } from 'express';
-import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
-import Usuario, { findOne } from '../models/Usuario.js';
-import { generarJWT } from '../helpers/generarJWT.js';
-import { errorHandler } from '../helpers/errorHandler.js';
+import bcryptjs from 'bcryptjs';
 import User from '../models/User.js';
 
+import { response } from 'express';
+import { generarJWT } from '../helpers/generarJWT.js';
+import { errorHandler } from '../helpers/errorHandler.js';
+import { validateUser } from '../schemas-zod/userSchema.js';
+
 export const createUser = async (req, res = response,next) => {
+
+  const result = validateUser(req.body)
+  if (result.error) return next(errorHandler(400, JSON.parse(result.error.message)))
 
   const { email, password } = req.body;
 
   try {
-    let user = await findOne({ email });
 
-    if (user) return next(errorHandler('400') , 'El email ya se encuentra registradro')
+    let user = await User.findOne({ email });
 
-    user = new User(req.body);
+    if (user) return next(errorHandler(400, 'El email ya se encuentra registradro') )
+
+    user =  new User(req.body);
 
     // Encriptar contraseña
-    const salt = genSaltSync();
-    user.password = hashSync(password, salt);
+    const salt = bcryptjs.genSaltSync();
+    user.password = bcryptjs.hashSync(password, salt);
 
 
     await user.save();
 
-    // Generar JWT
-    // const token = await generarJWT(usuario.id, usuario.name);
 
     res.status(201).json({
       ok: true,
       uid: user.id,
-      name: user.name,
-      token
+      name: user.name
     })
 
   } catch (error) {
     console.log(error)
-    return next(errorHandler('500'), error.message)
+    return next(errorHandler(500, error.message))
   }
 }
 
@@ -46,12 +48,12 @@ export const loginUser = async (req, res = response,next) => {
 
   try {
 
-    const user = await findOne({ email });
+    const user = await User.findOne({ email });
 
-    if (!user) return next(errorHandler('400', ' Datos incorrectos'))
+    if (!user) return next(errorHandler(400, ' Datos incorrectos'))
 
     // Confirmar los passwords
-    const validPassword = compareSync(password, user.password);
+    const validPassword = bcryptjs.compareSync(password, user.password);
 
     if (!validPassword) return next(errorHandler('400' , ' Datos incorrectos'))
 
@@ -69,7 +71,7 @@ export const loginUser = async (req, res = response,next) => {
 
   } catch (error) {
     console.log(error);
-    return next(errorHandler('500', error.message))
+    return next(errorHandler(500, error.message))
   }
 
 }
