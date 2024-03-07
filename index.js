@@ -7,12 +7,15 @@ import { dbConnection } from "./database/conection.js";
 import { eventRouter } from "./routes/event.js";
 import { errorHandlerMiddleware } from "./middlewares/error.js";
 import { patientRouter } from "./routes/patient.js";
-import { runScheduledTask } from "./bot/runCronTaks.js";
+import { runScheduledTask } from "./whatsapp/runCronTaks.js";
 import { authRouter } from './routes/auth.js';
+import { initializeClientWp } from './whatsapp/wpClient.js';
+import { wpRouter } from './routes/wp.js';
 
 
 dotenv.config()
 dbConnection()
+await initializeClientWp()
 
 const app = express()
 app.use(express.json())
@@ -25,6 +28,7 @@ app.use(express.static('public'))
 
 // rutas
 app.use('/api/auth', authRouter)
+app.use('/api/wp/', wpRouter)
 app.use('/api/patient' , patientRouter)
 app.use('/api/event',eventRouter)
 app.use(errorHandlerMiddleware)
@@ -36,7 +40,7 @@ app.listen(process.env.PORT, () => {
 
 
 
-// runScheduledTask()
+runScheduledTask()
 
 // // Función para obtener los eventos y ejecutar la lógica periódicamente
 // const runScheduledTask = async () => {

@@ -9,7 +9,7 @@ export const getEvents = async (req, res = response,next) => {
   const {idUser} = req.params
 
   const user =  await User.findById(idUser) 
-  console.log(user)
+  // console.log(user)
   if (!user) return next(errorHandler('400', 'No existe el usuario'))
 
   try {
@@ -43,7 +43,7 @@ export const createEvent = async (req, res = response,next) => {
 
 
   } catch (error) {
-    console.log(error)
+    console.log(error.message)
     return next(errorHandler('500' , error.message))
   }
 }

@@ -5,9 +5,10 @@ import { verifyToken } from '../middlewares/verifyToken.js';
 
 export const eventRouter = Router()
 
-eventRouter.use(verifyToken)
 
 eventRouter.get('/:idUser' , getEvents) 
+
+eventRouter.use(verifyToken)
 
 eventRouter.post('/',  createEvent)
 

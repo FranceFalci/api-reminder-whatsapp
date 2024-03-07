@@ -38,7 +38,7 @@ export const createPatient = async (req, res = response, next) => {
 
 
   } catch (error) {
-    console.log(error)
+    console.log(error.message)
     return next(errorHandler('500', error.message))
   }
 }
